@@ -8,6 +8,8 @@
 
 **توجه : برای نصب یوزر سودو نیاز هست**
 
+**در خط 12 بوت.لوا آیدی خود را وارد کنید**
+
 **team : @botnexbot and @datak_team**
 
 **Powered by @M_O_T_A_F_E_G_H_I_N : behrad**
