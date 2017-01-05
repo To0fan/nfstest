@@ -61,6 +61,30 @@ if msg.reply_to_message_id_ ~= 0 then
 deleteMessages(msg.chat_id_, {[0] = msg.id_})
 end
 end
+local username = db:hget('settings:username',msg.chat_id_)
+if username == 'del' then 
+if text_msg:match("[@]") then
+deleteMessages(msg.chat_id_, {[0] = msg.id_})
+end
+end
+local tag = db:hget('settings:tag',msg.chat_id_)
+if tag == 'del' then 
+if text_msg:match("[#]") then
+deleteMessages(msg.chat_id_, {[0] = msg.id_})
+end
+end
+local tag = db:hget('settings:emoji',msg.chat_id_)
+if tag == 'del' then 
+if text_msg:match("[😀😬😁😂😃😄😅😆😇😉😊🙂🙃☺️😋😌😍😘😗😙😚😜😝😛🤑🤓😎🤗😏😶😐😑😒🙄🤔😳😞😟😠😡😔😕🙁☹️😣😖😫😩😤😮😱😨😰😯😦😧😢😥😪😓😭😵😲🤐😷🤒🤕😴💤💩😈👿👹👺💀👻👽🤖😺😸😹😻😼😽🙀😿😾🙌👏👋👍👎👊✊✌️👌✋👐💪🙏☝️👆👇👈👉🖕🖐🤘🖖✍💅👄👅👂👃👁👀👤👥🗣👶👦👧👨👩👱👴👵👲👳👮👷💂🕵🎅👼👸👰🚶🏃💃👯👫👬👭🙇💁🙅🙆🙋🙎🙍💇💆💑👩‍❤️‍👩👨‍❤️‍👨💏👩‍❤️‍💋‍👩👨‍❤️‍💋‍👨👪👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👦👩‍👩‍👦‍👦👩‍👩‍👧‍👧👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦👨‍👨‍👧‍👧👨‍👨‍👧‍👧👚👕👖👔👗👙👘💄💋👣👠👡👢👞👟👒🎩🎓👑⛑🎒👝👛👜💼👓🕶💍🌂❤️💛💚💙💖💗💓💞💕❣💔💜💘💝]") then
+deleteMessages(msg.chat_id_, {[0] = msg.id_})
+end
+end
+local tag = db:hget('settings:muteall',msg.chat_id_)
+if tag == 'del' then 
+if text_msg:match("[\216-\219][\128-\191]") or text_msg:match("[qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM]") or text_msg:match("[😀😬😁😂😃😄😅😆😇😉😊🙂🙃☺️😋😌😍😘😗😙😚😜😝😛🤑🤓😎🤗😏😶😐😑😒🙄🤔😳😞😟😠😡😔😕🙁☹️😣😖😫😩😤😮😱😨😰😯😦😧😢😥😪😓😭😵😲🤐😷🤒🤕😴💤💩😈👿👹👺💀👻👽🤖😺😸😹😻😼😽🙀😿😾🙌👏👋👍👎👊✊✌️👌✋👐💪🙏☝️👆👇👈👉🖕🖐🤘🖖✍💅👄👅👂👃👁👀👤👥🗣👶👦👧👨👩👱👴👵👲👳👮👷💂🕵🎅👼👸👰🚶🏃💃👯👫👬👭🙇💁🙅🙆🙋🙎🙍💇💆💑👩‍❤️‍👩👨‍❤️‍👨💏👩‍❤️‍💋‍👩👨‍❤️‍💋‍👨👪👨‍👩‍👧👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧👩‍👩‍👦👩‍👩‍👧👩‍👩‍👧‍👦👩‍👩‍👦‍👦👩‍👩‍👧‍👧👨‍👨‍👦👨‍👨‍👧👨‍👨‍👧‍👦👨‍👨‍👦‍👦👨‍👨‍👧‍👧👨‍👨‍👧‍👧👚👕👖👔👗👙👘💄💋👣👠👡👢👞👟👒🎩🎓👑⛑🎒👝👛👜💼👓🕶💍🌂❤️💛💚💙💖💗💓💞💕❣💔💜💘💝]") or text_msg:match("[!@$%^&*(#-_+><}{.,`~]") then
+deleteMessages(msg.chat_id_, {[0] = msg.id_})
+end
+end
 end
 function on_edit(msg)
 local text_msg = msg.new_content_.text_:lower() or nil
