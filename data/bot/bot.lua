@@ -10,12 +10,22 @@ clr = require 'term.colors'
 db = redis.connect('127.0.0.1', 6379)
  sudo_users = {
 [185532812] = 'Mohammad-Reza',
+[201933234] = 'matin',
 }
 
 local plugins
 function is_sudo(msg)
   local var = false
   for k,v in pairs(sudo_users)do 
+    if k == msg.sender_user_id_  then
+      var = true
+    end
+	end
+  return var
+end
+function is_admin(msg)
+  local var = false
+  for k,v in pairs(config.admin_users)do 
     if k == msg.sender_user_id_  then
       var = true
     end
@@ -152,8 +162,10 @@ return false
 end
 return true
 end
-
-
+function save_config( )
+  serialize_to_file(config, './data/config.lua')
+  print ('saved config into ./data/config.lua')
+end
 function get_bot_info()
 bot = {}
 local function dl_info(arg,data)
@@ -195,6 +207,8 @@ function tdcli_update_callback(data)
 	text_msg = msg.content_.text_:lower() or nil
 if is_sudo(msg) and msg_vaild(msg)  then
 to_sudo(msg)
+elseif is_admin(msg) and msg_vaild(msg) then
+to_admin(msg)
 elseif is_owner(msg) and msg_vaild(msg) then
 to_owner(msg)
 elseif is_mod(msg) and msg_vaild(msg) then
