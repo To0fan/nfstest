@@ -63,6 +63,18 @@ if lang then
 	  end
 end
 return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
+elseif text_msg == "admin" then
+local text = '*Admin list* _:_ \n'
+local textfa = '*لیست ادمین ها* _:_ \n'
+for k,v in pairs(config.admin_users) do 
+text = text..'*'..k..'* - `('..get_info(v)..')`\n'
+textfa = textfa..'*'..k..'* - `('..get_info(v)..')`\n'
+end
+if lang then
+return sendText(msg.chat_id_, msg.id_, 0, 1, nil, textfa, 1, 'md')
+else
+return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
+end
 elseif text_msg == 'reload' then
 local plug_up = load_plugins()  
 if lang then
@@ -80,10 +92,81 @@ print(extype)
 end
 tdcli_function ({ID = "GetActiveSessions",}, dl_cb_active, 'behrad')
 else
+to_admin(msg)
+end
+end
+function to_admin(msg)
+local lang_hash = 'group:'..msg.chat_id_..':lang'
+local lang = db:get(lang_hash)
+if text_msg == "setowner" then
+if not msg.reply_to_message_id_  then
+else
+local function dl_cb_add_owner(arg, data)
+local userid = data.sender_user_id_
+    if db:sismember('owners'..msg.chat_id_,userid) then
+	if lang then
+	  local textfa = '`('..get_info(userid)..')` *دوباره اونر شد*'
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md')
+	  else
+	  local text = '`('..get_info(userid)..')` *is already a group owner*'
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md')
+	  end
+else
+if lang then
+	  local textfa = '`('..get_info(userid)..')` *اونر شد*'
+	  db:sadd('owners'..msg.chat_id_,userid)
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
+	  else
+	  local text = '`('..get_info(userid)..')` *is now a owner*'
+	  db:sadd('owners'..msg.chat_id_,userid)
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
+	  end
+    end
+end
+tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_add_owner, nil)
+end
+return 
+elseif text_msg == "remowner" then
+if not msg.reply_to_message_id_  then
+else
+local function dl_cb_rem_owner(arg, data)
+local userid = data.sender_user_id_
+    if not db:sismember('owners'..msg.chat_id_,userid) then
+	if lang then
+	  local textfa = '`('..get_info(userid)..')` *دوباره از لیست اونر ها پاک شد*'
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md')
+	  else
+	  local text = '`('..get_info(userid)..')` *is not a group owner*'
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md')
+	  end
+else
+if lang then
+	  local textfa = '`('..get_info(userid)..')` *از لیست اونر ها پاک شد*'
+	  db:srem('owners'..msg.chat_id_,userid)
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
+	  else
+	  local text = '`('..get_info(userid)..')` *removed from ownerlist*'
+	  db:srem('owners'..msg.chat_id_,userid)
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
+	  end
+	  end
+end
+tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_rem_owner, nil)
+end
+return 
+elseif text_msg == "clean owner" then 
+local hash = 'owners'..msg.chat_id_
+if lang then
+ text = '*لیست اونرها پاک شد*'
+else
+ text = '*Ownerlist has been cleaned*'
+ end
+ db:del(hash)
+ return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md') 
+else
 to_owner(msg)
 end
 end
-
 function settings_edit(msg,action,lock)
 local lang_hash = 'group:'..msg.chat_id_..':lang'
 local lang = db:get(lang_hash)
@@ -189,62 +272,6 @@ settings_edit(msg,table[2],'spam')
 end
 sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, nil) 
 return tdcli_function ({ID = "GetChannelMembers",channel_id_ = getChatId(msg.chat_id_).ID,filter_ = {ID = "ChannelMembersBots"},offset_ = 0,limit_ = 200}, dl_cb_clean_bots, nil)
-elseif text_msg == "setowner" then
-if not msg.reply_to_message_id_  then
-else
-local function dl_cb_add_owner(arg, data)
-local userid = data.sender_user_id_
-    if db:sismember('owners'..msg.chat_id_,userid) then
-	if lang then
-	  local textfa = '`('..get_info(userid)..')` *دوباره اونر شد*'
-	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md')
-	  else
-	  local text = '`('..get_info(userid)..')` *is already a group owner*'
-      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md')
-	  end
-else
-if lang then
-	  local textfa = '`('..get_info(userid)..')` *اونر شد*'
-	  db:sadd('owners'..msg.chat_id_,userid)
-	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
-	  else
-	  local text = '`('..get_info(userid)..')` *is now a owner*'
-	  db:sadd('owners'..msg.chat_id_,userid)
-      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
-	  end
-    end
-end
-tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_add_owner, nil)
-end
-return 
-elseif text_msg == "remowner" then
-if not msg.reply_to_message_id_  then
-else
-local function dl_cb_rem_owner(arg, data)
-local userid = data.sender_user_id_
-    if not db:sismember('owners'..msg.chat_id_,userid) then
-	if lang then
-	  local textfa = '`('..get_info(userid)..')` *دوباره از لیست اونر ها پاک شد*'
-	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md')
-	  else
-	  local text = '`('..get_info(userid)..')` *is not a group owner*'
-      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md')
-	  end
-else
-if lang then
-	  local textfa = '`('..get_info(userid)..')` *از لیست اونر ها پاک شد*'
-	  db:srem('owners'..msg.chat_id_,userid)
-	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
-	  else
-	  local text = '`('..get_info(userid)..')` *removed from ownerlist*'
-	  db:srem('owners'..msg.chat_id_,userid)
-      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
-	  end
-	  end
-end
-tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_rem_owner, nil)
-end
-return 
 elseif text_msg == "owner" then 
 if lang then
  text = '*لیست اونر ها* _:_ \n'
@@ -256,15 +283,6 @@ for k,v in pairs(owner) do
 text = text..'*'..k..'* - `('..get_info(v)..')`\n'
 return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md') 
 end
-elseif text_msg == "clean owner" then 
-local hash = 'owners'..msg.chat_id_
-if lang then
- text = '*لیست اونرها پاک شد*'
-else
- text = '*Ownerlist has been cleaned*'
- end
- db:del(hash)
- return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md') 
 elseif text_msg == "pin" and msg.reply_to_message_id_ then
 pinChannelMessage(msg.chat_id_, msg.reply_to_message_id_, 0)
 elseif text_msg == "unpin" then
@@ -276,6 +294,87 @@ local num = text_msg:match('^clean msg (.*)')
 print(num)
 for i=1,tonumber(num) do
 deleteMessages(msg.chat_id_, {[0] = msg.id_ - i})
+end
+elseif text_msg == "ban" then
+if not msg.reply_to_message_id_  then
+else
+local function dl_cb_add_banuser(arg, data)
+local userid = data.sender_user_id_
+    if db:sismember('banuser:'..msg.chat_id_,userid) then
+	if lang then
+	  local textfa = '`('..get_info(userid)..')` *دوباره در بن لیست اضافه شد*'
+	  chat_del_user(msg.chat_id_, userid)
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md')
+	  else
+	  local text = '`('..get_info(userid)..')` *is already a in banlist*'
+	  chat_del_user(msg.chat_id_, userid)
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md')
+	  end
+else
+if lang then
+	  local textfa = '`('..get_info(userid)..')` *در لیست بن لیست اضافه شد*'
+	   db:sadd('banuser:'..msg.chat_id_,userid)
+	  chat_del_user(msg.chat_id_, userid)
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
+	  else
+	  local text = '`('..get_info(userid)..')` *is now in banlist*'
+	  	db:sadd('banuser:'..msg.chat_id_,userid)
+	  chat_del_user(msg.chat_id_, userid)
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
+	  end
+    end
+end
+tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_add_banuser, 'md')
+end
+return 
+elseif text_msg == "unban" then
+if not msg.reply_to_message_id_  then
+else
+local function dl_cb_rem_banuser(arg, data)
+local userid = data.sender_user_id_
+    if not db:sismember('banuser:'..msg.chat_id_,userid) then
+	if lang then
+	  local textfa = '`('..get_info(userid)..')` *دوباره از لیست بن شده ها در آمد*'
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md')
+	  else
+	  local text = '`('..get_info(userid)..')` *is not in banlist*'
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md')
+	  end
+else
+if lang then
+	  local textfa = '`('..get_info(userid)..')` *از لیست بن شده ها پاک شد*'
+	   db:srem('banuser:'..msg.chat_id_,userid)
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
+	  else
+	  local text = '`('..get_info(userid)..')` *removed from banlist*'
+	  	db:srem('banuser:'..msg.chat_id_,userid)
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
+	  end
+    end
+end
+tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_rem_banuser, 'md')
+end
+return 
+elseif text_msg == "clean banlist" then 
+local hash = 'banuser:'..msg.chat_id_
+if lang then
+ text = '*لیست بن شده ها پاک شد*'
+else
+ text = '*banlist has been cleaned*'
+ end
+ db:del(hash)
+ return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md') 
+elseif text_msg == "banlist" then 
+local mod = db:smembers('banuser:'..msg.chat_id_)
+local text = '*Banlist* _:_\n'
+local textfa = '*لیست کسانی که دیگر نمیتوانند به گروه برگردند* _:_\n'
+for k,v in pairs(mod) do
+textfa = textfa..'*'..k..'* - `('..get_info(v)..')`\n'
+end
+if lang then
+return sendText(msg.chat_id_, msg.id_, 0, 1, nil, textfa, 1, 'md')
+else
+return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
 end
 elseif text_msg == "setmod" then
 if not msg.reply_to_message_id_  then
@@ -460,87 +559,6 @@ local textfa = "> *آیدی گروه* _:_ `["..msg.chat_id_.."]`\n> *آیدی ش
 return sendText(msg.chat_id_, msg.id_, 0, 1, nil, textfa, 1, 'md')
 else
 local text = "> *Chat Id* _:_ `["..msg.chat_id_.."]`\n> *Your Id* _:_ `["..msg.sender_user_id_.."]`"
-return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
-end
-elseif text_msg == "ban" then
-if not msg.reply_to_message_id_  then
-else
-local function dl_cb_add_banuser(arg, data)
-local userid = data.sender_user_id_
-    if db:sismember('banuser:'..msg.chat_id_,userid) then
-	if lang then
-	  local textfa = '`('..get_info(userid)..')` *دوباره در بن لیست اضافه شد*'
-	  chat_del_user(msg.chat_id_, userid)
-	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md')
-	  else
-	  local text = '`('..get_info(userid)..')` *is already a in banlist*'
-	  chat_del_user(msg.chat_id_, userid)
-      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md')
-	  end
-else
-if lang then
-	  local textfa = '`('..get_info(userid)..')` *در لیست بن لیست اضافه شد*'
-	   db:sadd('banuser:'..msg.chat_id_,userid)
-	  chat_del_user(msg.chat_id_, userid)
-	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
-	  else
-	  local text = '`('..get_info(userid)..')` *is now in banlist*'
-	  	db:sadd('banuser:'..msg.chat_id_,userid)
-	  chat_del_user(msg.chat_id_, userid)
-      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
-	  end
-    end
-end
-tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_add_banuser, 'md')
-end
-return 
-elseif text_msg == "unban" then
-if not msg.reply_to_message_id_  then
-else
-local function dl_cb_rem_banuser(arg, data)
-local userid = data.sender_user_id_
-    if not db:sismember('banuser:'..msg.chat_id_,userid) then
-	if lang then
-	  local textfa = '`('..get_info(userid)..')` *دوباره از لیست بن شده ها در آمد*'
-	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md')
-	  else
-	  local text = '`('..get_info(userid)..')` *is not in banlist*'
-      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md')
-	  end
-else
-if lang then
-	  local textfa = '`('..get_info(userid)..')` *از لیست بن شده ها پاک شد*'
-	   db:srem('banuser:'..msg.chat_id_,userid)
-	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
-	  else
-	  local text = '`('..get_info(userid)..')` *removed from banlist*'
-	  	db:srem('banuser:'..msg.chat_id_,userid)
-      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
-	  end
-    end
-end
-tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_rem_banuser, 'md')
-end
-return 
-elseif text_msg == "clean banlist" then 
-local hash = 'banuser:'..msg.chat_id_
-if lang then
- text = '*لیست بن شده ها پاک شد*'
-else
- text = '*banlist has been cleaned*'
- end
- db:del(hash)
- return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md') 
-elseif text_msg == "banlist" then 
-local mod = db:smembers('banuser:'..msg.chat_id_)
-local text = '*Banlist* _:_\n'
-local textfa = '*لیست کسانی که دیگر نمیتوانند به گروه برگردند* _:_\n'
-for k,v in pairs(mod) do
-textfa = textfa..'*'..k..'* - `('..get_info(v)..')`\n'
-end
-if lang then
-return sendText(msg.chat_id_, msg.id_, 0, 1, nil, textfa, 1, 'md')
-else
 return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
 end
 end
