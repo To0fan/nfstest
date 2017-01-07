@@ -66,7 +66,7 @@ return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
 elseif text_msg == "admin" then
 local text = '*Admin list* _:_ \n'
 local textfa = '*لیست ادمین ها* _:_ \n'
-for k,v in pairs(config.admin_users) do 
+for k,v in pairs(config.admins) do 
 text = text..'*'..k..'* - `('..get_info(v)..')`\n'
 textfa = textfa..'*'..k..'* - `('..get_info(v)..')`\n'
 end
@@ -84,6 +84,81 @@ if lang then
 	  local text = '*Bot reloaded*\n'..plug_up
       return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
 	  end
+	  elseif text_msg == "addadmin" then
+if not msg.reply_to_message_id_  then
+else
+local function dl_cb_add_admin(arg, data)
+local userid = data.sender_user_id_
+    if config['admins'][userid]  then
+ if lang then
+	  local textfa = '`('..get_info(userid)..')` *دوباره در لیست ادمین های ربات ذخیره شد*'
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
+	  else
+	  local text = '`('..get_info(userid)..')` *is already a bot admin*'
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
+	  end
+else
+if lang then
+	  local textfa = '`('..get_info(userid)..')` *ادمین شد*'
+	  config['admins'][userid] = "Project-Nfs"
+      save_config( )
+	  return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
+	  else
+	  local text = '`('..get_info(userid)..')` *is now a bot admin*'
+	  config['admins'][userid] = "Project-Nfs"
+      save_config( )
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
+	  end
+    end
+end
+tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_add_admin, nil)
+end
+return
+elseif text_msg == "removeadmin" then
+if not msg.reply_to_message_id_  then
+else
+local function dl_cb_add_admin(arg, data)
+local userid = data.sender_user_id_
+    if not config['admins'][userid] then
+ if lang then
+    local textfa = '`('..get_info(userid)..')` *دوباره از لیست ادمین ها پاک شد*'
+    return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
+    else
+    local text = '`('..get_info(userid)..')` *is already a bot removed from admin*'
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
+    end
+else
+if lang then
+    local textfa = '`('..get_info(userid)..')` *از لیست ادمین ها پاک شد*'
+    config['admins'][userid] = nil
+      save_config( )
+    return sendText(msg.chat_id_, data.id_, 0, 1, nil, textfa, 1, 'md') 
+    else
+    local text = '`('..get_info(userid)..')` *removed from adminlist*'
+    config['admins'] = nil
+      save_config( )
+      return sendText(msg.chat_id_, data.id_, 0, 1, nil, text, 1, 'md') 
+    end
+    end
+end
+tdcli_function({ID = "GetMessage",chat_id_ = msg.chat_id_,message_id_ = msg.reply_to_message_id_}, dl_cb_add_admin, nil)
+end
+return
+-------------------
+elseif text_msg == "clean admin" then
+if not config['admins'][userid] then
+if lang then
+local textfa = '*لیست ادمین ها پاک شد*'
+config['admins'] = {}
+save_config()
+return sendText(msg.chat_id_, msg.id_, 0, 1, nil, textfa, 1, 'md')
+else
+ local text = '*Adminlist has been cleaned*'
+ config['admins'] = {}
+save_config()
+ return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
+ end
+ end
 elseif text_msg == 'active' then
 local function dl_cb_active(arg, data,extype) 
 vardump(data)
@@ -554,12 +629,16 @@ else
  db:del(hash)
  return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md') 
 elseif text_msg == "id" then
+local function dl_photo(arg,data)
 if lang then
-local textfa = "> *آیدی گروه* _:_ `["..msg.chat_id_.."]`\n> *آیدی شما* _:_ `["..msg.sender_user_id_.."]`"
-return sendText(msg.chat_id_, msg.id_, 0, 1, nil, textfa, 1, 'md')
+local textfa = '> آیدی گروه : '..msg.chat_id_.."\n> آیدی شما : "..msg.sender_user_id_
+return sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, data.photos_[0].sizes_[1].photo_.persistent_id_, textfa)
 else
-local text = "> *Chat Id* _:_ `["..msg.chat_id_.."]`\n> *Your Id* _:_ `["..msg.sender_user_id_.."]`"
-return sendText(msg.chat_id_, msg.id_, 0, 1, nil, text, 1, 'md')
+local text = '> Chat id : '..msg.chat_id_.."\n> Your id : "..msg.sender_user_id_
+return sendPhoto(msg.chat_id_, msg.id_, 0, 1, nil, data.photos_[0].sizes_[1].photo_.persistent_id_, text)
 end
+end
+  tdcli_function ({ID = "GetUserProfilePhotos",user_id_ = msg.sender_user_id_,offset_ = 0,limit_ = 1}, dl_photo, nil)
+return 
 end
 end
