@@ -9,8 +9,8 @@ URL = require('socket.url')
 clr = require 'term.colors'
 db = redis.connect('127.0.0.1', 6379)
  sudo_users = {
-[185532812] = 'Mohammad-Reza',
-[201933234] = 'matin',
+[111334847] = 'ToOfan',
+
 }
 
 local plugins
