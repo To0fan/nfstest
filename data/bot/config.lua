@@ -1,11 +1,9 @@
 do local _ = {
+  admins = {},
   plugins = {
     "moderation",
-	"msg_ch"
-  },
-  admin_users = {
-[185532812] = 'Mohammad-Reza'
-}
+    "msg_ch"
+  }
 }
 return _
 end
